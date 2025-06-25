@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MoodMate Sticker App</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f5f5fa;
+      margin: 0;
+      padding: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 40px;
+      min-height: 100vh;
+    }
+
+    .builder {
+      width: 320px;
+      background: #fff;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+
+    .builder h2 {
+      font-size: 1.4em;
+      margin-bottom: 20px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .builder label {
+      display: block;
+      margin: 12px 0 6px;
+      font-weight: 600;
+      font-size: 0.9em;
+      color: #333;
+    }
+
+    .builder input,
+    .builder select,
+    .builder textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1.5px solid #ccc;
+      font-size: 1em;
+      font-family: 'Poppins', sans-serif;
+      transition: border-color 0.3s ease;
+      resize: vertical;
+    }
+
+    .builder input:focus,
+    .builder select:focus,
+    .builder textarea:focus {
+      outline: none;
+      border-color: #6a5af9;
+      box-shadow: 0 0 8px rgba(106, 90, 249, 0.3);
+    }
+
+    .emoji-options {
+      margin-top: 8px;
+    }
+    .emoji-options span {
+      cursor: pointer;
+      font-size: 1.8em;
+      margin: 6px 6px 6px 0;
+      padding: 4px 8px;
+      border-radius: 10px;
+      user-select: none;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      display: inline-block;
+    }
+
+    .emoji-options span.selected {
+      background-color: #6a5af9;
+      color: white;
+      transform: scale(1.2);
+      box-shadow: 0 0 10px rgba(106, 90, 249, 0.6);
+    }
+
+    .preview {
+      width: 360px;
+      border-radius: 24px;
+      padding: 36px 28px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      color: white;
+      font-weight: 600;
+      min-height: 480px;
+      background: linear-gradient(135deg, #ffd6e8, #dcd5ff);
+      transition: background 0.5s ease;
+    }
+
+    .mood-indicator {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 1em;
+      user-select: none;
+      color: white;
+      text-shadow: 0 0 3px black;
+    }
+    .mood-indicator .dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: red;
+      box-shadow: 0 0 8px red;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .mood-ok {
+      background: #2ecc71;
+      box-shadow: 0 0 8px #2ecc71;
+    }
+
+    .name {
+      font-size: 2.2em;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-shadow: 0 0 5px rgba(0,0,0,0.3);
+      max-width: 90%;
+      word-wrap: break-word;
+    }
+
+    .identity-line {
+      font-size: 1.1em;
+      opacity: 0.85;
+      text-shadow: 0 0 4px rgba(0,0,0,0.3);
+      max-width: 90%;
+      word-wrap: break-word;
+      font-weight: 500;
+    }
+
+    .pronouns {
+      background-color: rgba(255 255 255 / 0.35);
+      border-radius: 16px;
+      padding: 5px 14px;
+      font-size: 1em;
+      margin-left: 8px;
+      font-weight: 600;
+      color: #333;
+      user-select: none;
+      text-shadow: none;
+    }
+
+    .affirmations,
+    .journal-entry {
+      background: rgba(255 255 255 / 0.4);
+      border-radius: 18px;
+      padding: 20px 20px;
+      font-size: 1.1em;
+      line-height: 1.5;
+      width: 100%;
+      font-weight: 600;
+      color: #222;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      min-height: 90px;
+      white-space: pre-wrap;
+      user-select: none;
+    }
+
+    .emojis {
+      font-size: 2em;
+      user-select: none;
+      min-height: 50px;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="builder" aria-label="Sticker builder form">
+    <h2>Build Your MoodMate Sticker</h2>
+
+    <label for="nameInput">Name</label>
+    <input id="nameInput" type="text" placeholder="Your name" aria-describedby="nameHelp" />
+
+    <label for="pronounsInput">Pronouns</label>
+    <input id="pronounsInput" type="text" placeholder="they/them" aria-describedby="pronounsHelp" />
+
+    <label for="identityInput">Gender Identity (optional)</label>
+    <input id="identityInput" type="text" placeholder="nonbinary, trans femme, etc" aria-describedby="identityHelp" />
+
+    <label for="bgSelect">Background</label>
+    <select id="bgSelect" aria-describedby="bgHelp" aria-label="Choose background color gradient">
+      <option value="linear-gradient(135deg, #ffd6e8, #dcd5ff)">Pink Lavender</option>
+      <option value="linear-gradient(135deg, #b2fefa, #0ed2f7)">Teal Sky</option>
+      <option value="linear-gradient(135deg, #ffecd2, #fcb69f)">Peach</option>
+      <option value="linear-gradient(135deg, #d4fc79, #96e6a1)">Green Haze</option>
+      <option value="linear-gradient(135deg, #ff9a9e, #fad0c4)">Rose Cloud</option>
+      <option value="linear-gradient(135deg, #a18cd1, #fbc2eb)">Lilac Mist</option>
+      <option value="linear-gradient(135deg, #f6d365, #fda085)">Sunny Coral</option>
+    </select>
+
+    <label for="categorySelect">Affirmation Category</label>
+    <select id="categorySelect" aria-describedby="affirmationHelp" aria-label="Choose affirmation category">
+      <option value="empowerment">Empowerment</option>
+      <option value="calm">Calm</option>
+      <option value="identity">Identity</option>
+      <option value="joy">Joy</option>
+    </select>
+
+    <label for="affirmationSelect">Affirmation</label>
+    <select id="affirmationSelect" aria-describedby="affirmationHelp" aria-label="Choose affirmation"></select>
+
+    <label>Choose Emojis (click to select up to 5)</label>
+    <div class="emoji-options" id="emojiOptions" role="list" aria-label="Emoji selection">
+      <span role="listitem" tabindex="0" aria-pressed="false">💖</span>
+      <span role="listitem" tabindex="0" aria-pressed="false">🏳️‍🌈</span>
+      <span role="listitem" tabindex="0" aria-pressed="false">🏳️‍⚧️</span>
+      <span role="listitem" tabindex="0" aria-pressed="false">✨</span>
+      <span role="listitem" tabindex="0" aria-pressed="false">💕</span>
+      <span role="listitem" tabindex="0" aria-pressed="false">⚧</span>
+      <span role="listitem" tabindex="0" aria-pressed="false">🌟</span>
+      <span role="listitem" tabindex="0" aria-pressed="false">🌸</span>
+      <span role="listitem" tabindex="0" aria-pressed="false">🫶</span>
+      <span role="listitem" tabindex="0" aria-pressed="false">🌈</span>
+      <span role="listitem" tabindex="0" aria-pressed="false">🔥</span>
+      <span role="listitem" tabindex="0" aria-pressed="false">💫</span>
+      <span role="listitem" tabindex="0" aria-pressed="false">🧡</span>
+      <span role="listitem" tabindex="0" aria-pressed="false">💜</span>
+    </div>
+
+    <label for="moodSelect">Mental State</label>
+    <select id="moodSelect" aria-describedby="moodHelp" aria-label="Select your current mental state">
+      <option value="false">Not Okay (Red)</option>
+      <option value="true">Okay (Green)</option>
+    </select>
+
+    <label for="journalInput">Journal Entry</label>
+    <textarea id="journalInput" rows="3" placeholder="Write your thoughts..." aria-describedby="journalHelp"></textarea>
+  </div>
+
+  <div class="preview" id="preview" aria-live="polite" aria-label="Sticker preview">
+    <div class="mood-indicator" id="moodIndicator" title="Green means okay, Red means not okay">
+      <div class="dot mood-not-ok"></div>
+      <span id="moodLabel">Not Okay</span>
+    </div>
+    <div class="name" id="previewName">Your Name</div>
+    <div class="identity-line" id="previewIdentityLine">Your gender identity or description</div>
+    <div>
+      <span class="pronouns" id="previewPronouns">they/them</span>
+    </div>
+    <div class="affirmations" id="previewAffirmation">Select an affirmation category and phrase</div>
+    <div class="emojis" id="previewEmojis">✨🏳️‍🌈</div>
+    <div class="journal-entry" id="previewJournal">Your journal entry will appear here.</div>
+  </div>
+
+  <script>
+    const affirmationsByCategory = {
+      empowerment: [
+        "I am strong and capable.",
+        "I control my own destiny.",
+        "Every challenge makes me stronger.",
+        "I am worthy of love and respect.",
+        "My voice matters."
+      ],
+      calm: [
+        "I am at peace with myself.",
+        "Breathing deeply brings me calm.",
+        "I release all tension and stress.",
+        "I am grounded and centered.",
+        "Peace fills my mind."
+      ],
+      identity: [
+        "I embrace my true self.",
+        "My identity is valid and beautiful.",
+        "I am proud of who I am.",
+        "I celebrate my uniqueness.",
+        "Being me is enough."
+      ],
+      joy: [
+        "I find joy in little moments.",
+        "Laughter lights up my day.",
+        "Happiness is within me.",
+        "I deserve to feel joyful.",
+        "Smiles are contagious."
+      ],
+    };
+
+    // Elements
+    const nameInput = document.getElementById('nameInput');
+    const pronounsInput = document.getElementById('pronounsInput');
+    const identityInput = document.getElementById('identityInput');
+    const bgSelect = document.getElementById('bgSelect');
+    const categorySelect = document.getElementById('categorySelect');
+    const affirmationSelect = document.getElementById('affirmationSelect');
+    const emojiOptions = document.getElementById('emojiOptions');
+    const moodSelect = document.getElementById('moodSelect');
+    const journalInput = document.getElementById('journalInput');
+
+    const preview = document.getElementById('preview');
+    const previewName = document.getElementById('previewName');
+    const previewPronouns = document.getElementById('previewPronouns');
+    const previewIdentityLine = document.getElementById('previewIdentityLine');
+    const previewAffirmation = document.getElementById('previewAffirmation');
+    const previewEmojis = document.getElementById('previewEmojis');
+    const previewJournal = document.getElementById('previewJournal');
+    const moodIndicator = document.getElementById('moodIndicator');
+    const moodLabel = document.getElementById('moodLabel');
+
+    // Initialize affirmation options based on selected category
+    function updateAffirmations() {
+      const category = categorySelect.value;
+      const affirmations = affirmationsByCategory[category] || [];
+      affirmationSelect.innerHTML = '';
+      affirmations.forEach(phrase => {
+        const option = document.createElement('option');
+        option.value = phrase;
+        option.textContent = phrase;
+        affirmationSelect.appendChild(option);
+      });
+      updatePreview();
+    }
+
+    // Track selected emojis
+    let selectedEmojis = new Set();
+
+    // Handle emoji clicks
+    emojiOptions.querySelectorAll('span').forEach(span => {
+      span.addEventListener('click', () => {
+        const emoji = span.textContent;
+        if (selectedEmojis.has(emoji)) {
+          selectedEmojis.delete(emoji);
+          span.classList.remove('selected');
+          span.setAttribute('aria-pressed', 'false');
+        } else {
+          if (selectedEmojis.size < 5) {
+            selectedEmojis.add(emoji);
+            span.classList.add('selected');
+            span.setAttribute('aria-pressed', 'true');
+          } else {
+            alert('You can select up to 5 emojis.');
+          }
+        }
+        updatePreview();
+      });
+
+      // Allow keyboard toggling on emoji spans for accessibility
+      span.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          span.click();
+        }
+      });
+    });
+
+    // Update preview based on inputs
+    function updatePreview() {
+      previewName.textContent = nameInput.value.trim() || 'Your Name';
+
+      const pronounsVal = pronounsInput.value.trim();
+      previewPronouns.textContent = pronounsVal || 'they/them';
+
+      const identityVal = identityInput.value.trim();
+      previewIdentityLine.textContent = identityVal || 'Your gender identity or description';
+
+      preview.style.background = bgSelect.value;
+
+      previewAffirmation.textContent = affirmationSelect.value || 'Select an affirmation category and phrase';
+
+      previewEmojis.textContent = [...selectedEmojis].join(' ') || '✨🏳️‍🌈';
+
+      previewJournal.textContent = journalInput.value.trim() || 'Your journal entry will appear here.';
+
+      // Mood indicator update
+      const moodOk = moodSelect.value === 'true';
+      if (moodOk) {
+        moodIndicator.querySelector('.dot').classList.add('mood-ok');
+        moodIndicator.querySelector('.dot').classList.remove('mood-not-ok');
+        moodLabel.textContent = 'Okay';
+      } else {
+        moodIndicator.querySelector('.dot').classList.remove('mood-ok');
+        moodIndicator.querySelector('.dot').classList.add('mood-not-ok');
+        moodLabel.textContent = 'Not Okay';
+      }
+    }
+
+    // Initialize
+    categorySelect.addEventListener('change', () => {
+      updateAffirmations();
+    });
+
+    // Update preview on input changes
+    [
+      nameInput,
+      pronounsInput,
+      identityInput,
+      bgSelect,
+      affirmationSelect,
+      moodSelect,
+      journalInput,
+    ].forEach(el => el.addEventListener('input', updatePreview));
+
+    // Initial load
+    updateAffirmations();
+    updatePreview();
+  </script>
+</body>
+</html>
